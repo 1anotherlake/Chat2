@@ -9,20 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var fireStoreManager: FireStoreManager
-    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-
-            Text("Hello, world!")
-            ForEach(fireStoreManager.chatData, id: \.self) { data in
-                Text(data.name)
-                Text(data.message)
+        NavigationView {
+            VStack {
+                NavigationLink("Chat") {
+                    ChattingView()
+                        .environmentObject(fireStoreManager)
+                }
             }
+            .padding()
         }
-        .padding()
     }
 }
 
