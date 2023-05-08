@@ -42,7 +42,7 @@ struct ChattingView: View {
                         Spacer()
                     }
                     if chat.name != "system" {
-                        Text(chat.date!)
+                        Text(changeDate(date: chat.date!))
                             .fontWeight(Font.Weight.light)
                             .font(Font.footnote)
                             .frame(height: 40, alignment: .bottom)
@@ -69,10 +69,21 @@ struct ChattingView: View {
                             .foregroundColor(.white)
                             .background(Color.gray)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .contextMenu {
+                                Button("Delete") {
+                                    print(chat.date)
+                                    if let date = chat.date {
+                                        fireStoreManager.deleteData(date: date)
+                                        fireStoreManager.fetchData()
+                                    }
+                                }
+                                Text("Menu Item 2")
+                                Text("Menu Item 3")
+                            }
                             
                     }
                     if chat.name == "system" {
-                        Text(chat.date!)
+                        Text(changeDate(date: chat.date!))
                             .fontWeight(Font.Weight.light)
                             .font(Font.footnote)
                             .frame(alignment: .bottom)
@@ -83,9 +94,18 @@ struct ChattingView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
-
             }
+            
         }
+        .listStyle(.inset)
+        .listRowSeparator(.hidden)
+    }
+    
+    private func changeDate(date: String) -> String {
+        let pattern = "\\d{2}:\\d{2}"
+        var result = date.range(of: pattern, options: .regularExpression)!
+        
+        return String(date[result])
     }
 }
 

@@ -52,8 +52,6 @@ class FireStoreManager: ObservableObject {
         var timeString = formatter.string(from: now)
         
         let userRef = ref.document(timeString)
-        formatter.dateFormat = "HH:mm"
-        timeString = formatter.string(from: now)
         userRef.setData([
             "name" : name,
             "message" : message,
@@ -69,6 +67,16 @@ class FireStoreManager: ObservableObject {
         db.collection("talkroom").document("Default").setData([
             "Last Message" : message
         ])
+    }
+    
+    func deleteData(date: String) {
+        db.collection("talkroom").document("Default").collection("message").document(date).delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                print("Document successfully removed!")
+            }
+        }
     }
     
     init() {
