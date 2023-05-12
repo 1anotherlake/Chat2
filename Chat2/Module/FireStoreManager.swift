@@ -49,7 +49,7 @@ class FireStoreManager: ObservableObject {
         let now = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "YYYY.MM.dd HH:mm:ss"
-        var timeString = formatter.string(from: now)
+        let timeString = formatter.string(from: now)
         
         let userRef = ref.document(timeString)
         userRef.setData([
@@ -65,7 +65,8 @@ class FireStoreManager: ObservableObject {
         }
         
         db.collection("talkroom").document("Default").setData([
-            "Last Message" : message
+            "Last Message" : message,
+            "lastDate" : timeString
         ])
     }
     
@@ -75,6 +76,46 @@ class FireStoreManager: ObservableObject {
                 print("Error removing document: \(err)")
             } else {
                 print("Document successfully removed!")
+            }
+        }
+        
+        let now = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "YYYY.MM.dd HH:mm:ss"
+        let timeString = formatter.string(from: now)
+        
+        db.collection("talkroom").document("Default").setData([
+            "Last Message" : "DELETE MESSAGE",
+            "lastDate" : timeString
+        ])
+    }
+    
+    func updateData() {
+        var lastDate: String = ""
+        let docRef = db.collection("talkroom").document("Default")
+        
+        docRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                lastDate = document.get("lastDate") as! String
+                // 사용할 fieldValue 값에 대한 처리
+                let query = docRef.collection("message").whereField("date", isLessThan: lastDate)
+                query.getDocuments { querySnapshot, error in
+                    if let error = error {
+                        print("Error getting documents: \(error)")
+                    } else {
+                        self.chatData += querySnapshot!.documents.map { document in
+                            let data = document.data()
+                            let date = data["date"] as? String ?? ""
+                            let name = data["name"] as? String ?? ""
+                            let message = data["message"] as? String ?? ""
+                            return Chat(date: date, name: name, message: message)
+                        }
+                    }
+                }
+                print("가져온 값: ", lastDate)
+                print("쿼리 결과: ", query)
+            } else {
+                print("Can't Update : Document does not exist")
             }
         }
     }

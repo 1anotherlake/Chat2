@@ -6,21 +6,24 @@
 //
 
 import SwiftUI
+import Combine
 
 struct ChattingView: View {
     @EnvironmentObject var fireStoreManager: FireStoreManager
     @State var chat: String = ""
+    @State var keyboardHeight: CGFloat = 0.0
     
     var body: some View {
         GeometryReader { proxy in
             VStack {
                 scrollView
-                ZStack {
-                    Color.green.opacity(0.11)
+                Group {
                     HStack {
                         TextField("Chatting~~", text: $chat)
-                            .frame(width: proxy.size.width/3*2, height: proxy.size.height/20)
                             .padding(.leading)
+                            .padding(.vertical, 10)
+                            .frame(width: proxy.size.width/3*2)
+
                         Image(systemName: "paperplane")
                             .padding(.trailing)
                             .onTapGesture {
@@ -29,7 +32,13 @@ struct ChattingView: View {
                             }
                     }
                 }
+                .background(Color.gray.opacity(0.11))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 .frame(width: proxy.size.width/3*2, height: proxy.size.height/20)
+                
+                Button("Update Data") {
+                    fireStoreManager.updateData()
+                }
             }
         }
     }
@@ -71,10 +80,9 @@ struct ChattingView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .contextMenu {
                                 Button("Delete") {
-                                    print(chat.date)
+                                    print(chat.date ?? "nil")
                                     if let date = chat.date {
                                         fireStoreManager.deleteData(date: date)
-                                        fireStoreManager.fetchData()
                                     }
                                 }
                                 Text("Menu Item 2")
@@ -93,7 +101,6 @@ struct ChattingView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.bottom)
             }
             
         }
@@ -103,12 +110,11 @@ struct ChattingView: View {
     
     private func changeDate(date: String) -> String {
         let pattern = "\\d{2}:\\d{2}"
-        var result = date.range(of: pattern, options: .regularExpression)!
+        let result = date.range(of: pattern, options: .regularExpression)!
         
         return String(date[result])
     }
 }
-
 
 struct ChattingView_Previews: PreviewProvider {
     static var previews: some View {
