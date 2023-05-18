@@ -10,6 +10,7 @@ import Combine
 
 struct ChattingView: View {
     @EnvironmentObject var fireStoreManager: FireStoreManager
+    @EnvironmentObject var authManager: AuthManager
     @State var chat: String = ""
     @State var keyboardHeight: CGFloat = 0.0
     
@@ -27,7 +28,7 @@ struct ChattingView: View {
                         Image(systemName: "paperplane")
                             .padding(.trailing)
                             .onTapGesture {
-                                fireStoreManager.saveData(message: $chat.wrappedValue, name: "Root")
+                                fireStoreManager.saveData(message: $chat.wrappedValue, name: authManager.userName, uid: authManager.currentUser?.uid ?? "")
                                 chat = ""
                             }
                     }
@@ -35,10 +36,7 @@ struct ChattingView: View {
                 .background(Color.gray.opacity(0.11))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .frame(width: proxy.size.width/3*2, height: proxy.size.height/20)
-                
-                Button("Update Data") {
-                    fireStoreManager.updateData()
-                }
+                Rectangle().foregroundColor(Color.white).frame(height: 10)
             }
         }
     }
@@ -47,16 +45,16 @@ struct ChattingView: View {
         ScrollView {
             ForEach(fireStoreManager.chatData, id: \.self) { chat in
                 HStack(alignment: .bottom) {
-                    if chat.name != "system" {
+                    if chat.uid == authManager.currentUser?.uid ?? "" {
                         Spacer()
                     }
-                    if chat.name != "system" {
+                    if chat.uid == authManager.currentUser?.uid ?? "" {
                         Text(changeDate(date: chat.date!))
                             .fontWeight(Font.Weight.light)
                             .font(Font.footnote)
                             .frame(height: 40, alignment: .bottom)
                     }
-                        if chat.name == "system" {
+                    if chat.uid != authManager.currentUser?.uid ?? "" {
                             Image(systemName: "person.circle.fill")
                                 .resizable()
                                 .scaledToFit()
@@ -65,7 +63,7 @@ struct ChattingView: View {
                                 .padding(.bottom, 20)
                         }
                     VStack(alignment: .leading) {
-                        if chat.name == "system" {
+                        if chat.uid != authManager.currentUser?.uid ?? "" {
                             Text(chat.name)
                                 .fontWeight(Font.Weight.light)
                                 .font(Font.footnote)
@@ -85,18 +83,16 @@ struct ChattingView: View {
                                         fireStoreManager.deleteData(date: date)
                                     }
                                 }
-                                Text("Menu Item 2")
-                                Text("Menu Item 3")
                             }
                             
                     }
-                    if chat.name == "system" {
+                    if chat.uid != authManager.currentUser?.uid ?? "" {
                         Text(changeDate(date: chat.date!))
                             .fontWeight(Font.Weight.light)
                             .font(Font.footnote)
                             .frame(alignment: .bottom)
                     }
-                    if chat.name == "system" {
+                    if chat.uid != authManager.currentUser?.uid ?? "" {
                         Spacer()
                     }
                 }
@@ -120,6 +116,7 @@ struct ChattingView_Previews: PreviewProvider {
     static var previews: some View {
         ChattingView()
             .environmentObject(FireStoreManager())
+            .environmentObject(AuthManager())
     }
 }
 

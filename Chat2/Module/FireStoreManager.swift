@@ -23,7 +23,8 @@ class FireStoreManager: ObservableObject {
                     let date = data["date"] as? String ?? ""
                     let name = data["name"] as? String ?? ""
                     let message = data["message"] as? String ?? ""
-                    return Chat(date: date, name: name, message: message)
+                    let uid = data["uid"] as? String ?? ""
+                    return Chat(date: date, name: name, message: message, uid: uid)
                 }
             }
         }
@@ -43,7 +44,7 @@ class FireStoreManager: ObservableObject {
         }
     }
     
-    func saveData(message: String, name: String) {
+    func saveData(message: String, name: String, uid: String) {
         let ref = db.collection("talkroom").document("Default").collection("message")
         
         let now = Date()
@@ -55,7 +56,8 @@ class FireStoreManager: ObservableObject {
         userRef.setData([
             "name" : name,
             "message" : message,
-            "date" : timeString
+            "date" : timeString,
+            "uid" : uid
         ]) { err in
             if let err = err {
                 print("Error adding document: \(err)")
@@ -108,7 +110,8 @@ class FireStoreManager: ObservableObject {
                             let date = data["date"] as? String ?? ""
                             let name = data["name"] as? String ?? ""
                             let message = data["message"] as? String ?? ""
-                            return Chat(date: date, name: name, message: message)
+                            let uid = data["uid"] as? String ?? ""
+                            return Chat(date: date, name: name, message: message, uid: uid)
                         }
                     }
                 }
@@ -116,6 +119,22 @@ class FireStoreManager: ObservableObject {
                 print("쿼리 결과: ", query)
             } else {
                 print("Can't Update : Document does not exist")
+            }
+        }
+    }
+    
+    func createRoom(name: String, member: [String]) {
+        let ref = db.collection("talkroom")
+        
+        let userRef = ref.document(name)
+        userRef.setData([
+            "name" : name,
+            "member" : member
+        ]) { err in
+            if let err = err {
+                print("Error adding document: \(err)")
+            } else {
+                print("Talkroom Create! : \(userRef.documentID)")
             }
         }
     }

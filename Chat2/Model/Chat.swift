@@ -11,4 +11,5 @@ struct Chat: Hashable {
     var date: String?
     var name: String
     var message: String
+    var uid: String
 }
